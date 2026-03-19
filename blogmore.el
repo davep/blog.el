@@ -133,9 +133,10 @@ date: %s
     (goto-char (point-min))
     (if (re-search-forward blogmore--category-regexp-line nil t)
         (replace-match (format "category: %s" category) t)
-      (if (re-search-forward "^---$" nil t)
-          (insert (format "\ncategory: %s" category))
-        (error "Could not find a location to insert the category")))))
+      (unless (re-search-forward "^---$" nil t 2)
+        (error "Could not find a location to insert the category"))
+      (beginning-of-line)
+      (insert (format "category: %s\n" category)))))
 
 (provide 'blogmore)
 
