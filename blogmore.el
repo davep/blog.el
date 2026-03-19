@@ -2,7 +2,7 @@
 ;; Copyright 2026 by Dave Pearson <davep@davep.org>
 
 ;; Author: Dave Pearson <davep@davep.org>
-;; Version: 1.2
+;; Version: 1.3
 ;; Keywords: convenience
 ;; URL: https://github.com/davep/blogmoe.el
 ;; Package-Requires: ((emacs "25.1") (end-it "1.20"))
@@ -46,8 +46,11 @@ date: %s
 ---\n\n\n\n"
   "Template for new blog posts.")
 
-(defconst blogmore--category-regexp (rx bol "category:" (* space) (group (+ any)) eol)
+(defconst blogmore--category-regexp-line (rx bol "category:" (* nonl) eol)
   "Regular expression to match category lines in blog posts.")
+
+(defconst blogmore--category-regexp (rx bol "category:" (* space) (group (* any)) eol)
+  "Regular expression for matching a category data.")
 
 (defun blogmore--slug (title)
   "Generate a slug from the given TITLE."
@@ -128,9 +131,11 @@ date: %s
     (error "This doesn't look like a blog post"))
   (save-excursion
     (goto-char (point-min))
-    ;; TODO: If the category is empty it seems to nuke the next line.
-    (when (re-search-forward blogmore--category-regexp)
-      (replace-match (concat "category: " category) t))))
+    (if (re-search-forward blogmore--category-regexp-line nil t)
+        (replace-match (format "category: %s" category) t)
+      (if (re-search-forward "^---$" nil t)
+          (insert (format "\ncategory: %s" category))
+        (error "Could not find a location to insert the category")))))
 
 (provide 'blogmore)
 
