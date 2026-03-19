@@ -74,7 +74,7 @@ date: %s
 
 ;;;###autoload
 (defun blog-new (title)
-  "Start a new blog post."
+  "Start a new blog post with a title of TITLE."
   (interactive "sTitle: ")
   (blog--ensure-directory)
   (find-file (blog--file-from-title title))
@@ -90,11 +90,10 @@ date: %s
 
 ;;;###autoload
 (defun blog-edit (file)
-  "Open an existing blog post for editing."
+  "Edit FILE from my blog.."
   (interactive
    (list
     (completing-read
-
      "File: "
      (directory-files-recursively blog-posts-directory "\\.md$"))))
   (find-file file))
