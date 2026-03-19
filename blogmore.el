@@ -2,7 +2,7 @@
 ;; Copyright 2026 by Dave Pearson <davep@davep.org>
 
 ;; Author: Dave Pearson <davep@davep.org>
-;; Version: 1.2
+;; Version: 1.3
 ;; Keywords: convenience
 ;; URL: https://github.com/davep/blogmoe.el
 ;; Package-Requires: ((emacs "25.1") (end-it "1.20"))
@@ -46,6 +46,12 @@ date: %s
 ---\n\n\n\n"
   "Template for new blog posts.")
 
+(defconst blogmore--category-regexp-line (rx bol "category:" (* nonl) eol)
+  "Regular expression to match category lines in blog posts.")
+
+(defconst blogmore--category-regexp (rx bol "category:" (* space) (group (* any)) eol)
+  "Regular expression for matching a category data.")
+
 (defun blogmore--slug (title)
   "Generate a slug from the given TITLE."
   (thread-last
@@ -72,6 +78,25 @@ date: %s
    (format-time-string "%Y-%m-%d")
    (blogmore--slug title)))
 
+(defun blogmore--post-p ()
+  "Does this buffer look like a blog post?"
+  (save-excursion
+    (goto-char (point-min))
+    (looking-at "---\n")))
+
+(defun blogmore--current-categories ()
+  "Get a list of categories from existing posts."
+  (sort
+   (delq
+    nil
+    (mapcar
+     (lambda (candidate)
+       (when (string-match blogmore--category-regexp candidate)
+         (string-trim (match-string 1 candidate))))
+     (delete-dups
+      (split-string
+       (shell-command-to-string (format "grep -h '^category:' %s/**/*.md" blogmore-posts-directory)) "\n" t))))))
+
 ;;;###autoload
 (defun blogmore-new (title)
   "Start a new blog post with a title of TITLE."
@@ -97,6 +122,21 @@ date: %s
      "File: "
      (directory-files-recursively blogmore-posts-directory "\\.md$"))))
   (find-file file))
+
+;;;###autoload
+(defun blogmore-set-category (category)
+  "Set the category of the post to CATEGORY."
+  (interactive (list (completing-read "Category: " (blogmore--current-categories))))
+  (unless (blogmore--post-p)
+    (error "This doesn't look like a blog post"))
+  (save-excursion
+    (goto-char (point-min))
+    (if (re-search-forward blogmore--category-regexp-line nil t)
+        (replace-match (format "category: %s" category) t)
+      (unless (re-search-forward "^---$" nil t 2)
+        (error "Could not find a location to insert the category"))
+      (beginning-of-line)
+      (insert (format "category: %s\n" category)))))
 
 (provide 'blogmore)
 
