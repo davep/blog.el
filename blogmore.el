@@ -4,7 +4,7 @@
 ;; Author: Dave Pearson <davep@davep.org>
 ;; Version: 1.2
 ;; Keywords: convenience
-;; URL: https://github.com/davep/blog.el
+;; URL: https://github.com/davep/blogmoe.el
 ;; Package-Requires: ((emacs "25.1") (end-it "1.20"))
 
 ;; This program is free software: you can redistribute it and/or modify it
