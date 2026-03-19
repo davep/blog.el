@@ -1,4 +1,4 @@
-;;; blog.el --- Tools for working with my personal blog -*- lexical-binding: t -*-
+;;; blogmore.el --- Tools for working with my personal blog -*- lexical-binding: t -*-
 ;; Copyright 2026 by Dave Pearson <davep@davep.org>
 
 ;; Author: Dave Pearson <davep@davep.org>
@@ -31,13 +31,13 @@
 
 (require 'end-it)
 
-(defconst blog-directory "~/write/davep.github.com/"
+(defconst blogmore-directory "~/write/davep.github.com/"
   "Root directory for my blog.")
 
-(defconst blog-posts-directory (concat blog-directory "content/posts")
+(defconst blogmore-posts-directory (concat blogmore-directory "content/posts")
   "Directory where blog posts are stored.")
 
-(defconst blog-template "---
+(defconst blogmore-template "---
 layout: post
 title: %s
 category:
@@ -46,7 +46,7 @@ date: %s
 ---\n\n\n\n"
   "Template for new blog posts.")
 
-(defun blog--slug (title)
+(defun blogmore--slug (title)
   "Generate a slug from the given TITLE."
   (thread-last
     title
@@ -54,34 +54,34 @@ date: %s
     (replace-regexp-in-string "[^a-z0-9]+" "-")
     (replace-regexp-in-string "^-\\|-$" "")))
 
-(defun blog--post-directory ()
+(defun blogmore--post-directory ()
   "Get the directory for the current year's blog posts."
-  (format "%s/%s" blog-posts-directory (format-time-string "%Y")))
+  (format "%s/%s" blogmore-posts-directory (format-time-string "%Y")))
 
-(defun blog--ensure-directory ()
+(defun blogmore--ensure-directory ()
   "Ensure that the given directory exists."
-  (let ((post-directory (blog--post-directory)))
+  (let ((post-directory (blogmore--post-directory)))
     (unless (file-exists-p post-directory)
       (make-directory post-directory t))))
 
-(defun blog--file-from-title (title)
+(defun blogmore--file-from-title (title)
   "Generate a filename for a blog post from the given TITLE."
   (format
    "%s/%s-%s.md"
-   (blog--post-directory)
+   (blogmore--post-directory)
    (format-time-string "%Y-%m-%d")
-   (blog--slug title)))
+   (blogmore--slug title)))
 
 ;;;###autoload
-(defun blog-new (title)
+(defun blogmore-new (title)
   "Start a new blog post with a title of TITLE."
   (interactive "sTitle: ")
-  (blog--ensure-directory)
-  (find-file (blog--file-from-title title))
+  (blogmore--ensure-directory)
+  (find-file (blogmore--file-from-title title))
   (when (string-empty-p (buffer-string))
     (insert
      (format
-      blog-template
+      blogmore-template
       title
       (format-time-string "%Y-%m-%d %H:%M:%S %z")))
     (forward-line -2)
@@ -89,15 +89,15 @@ date: %s
       (end-it))))
 
 ;;;###autoload
-(defun blog-edit (file)
+(defun blogmore-edit (file)
   "Edit FILE from my blog.."
   (interactive
    (list
     (completing-read
      "File: "
-     (directory-files-recursively blog-posts-directory "\\.md$"))))
+     (directory-files-recursively blogmore-posts-directory "\\.md$"))))
   (find-file file))
 
-(provide 'blog)
+(provide 'blogmore)
 
-;;; blog.el ends here
+;;; blogmore.el ends here
