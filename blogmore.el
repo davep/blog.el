@@ -222,6 +222,12 @@ frontmatter."
   (interactive)
   (blogmore--set-frontmatter-property "date" (blogmore--now)))
 
+;;;###autoload
+(defun blogmore-update-modified ()
+  "Update the modified date of the post to the current date and time."
+  (interactive)
+  (blogmore--set-frontmatter-property "modified" (blogmore--now)))
+
 (provide 'blogmore)
 
 ;;; blogmore.el ends here
