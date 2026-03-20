@@ -144,12 +144,16 @@ date: %s
      (directory-files-recursively blogmore-posts-directory "\\.md$"))))
   (find-file file))
 
+(defun blogmore--with (prompt existing-values)
+  "Prompt the user with PROMPT and offer EXISTING-VALUES as completions."
+  (if (blogmore--post-p)
+      (list (completing-read prompt existing-values))
+    (error "This doesn't look like a blog post")))
+
 ;;;###autoload
 (defun blogmore-set-category (category)
   "Set the category of the post to CATEGORY."
-  (interactive (list (completing-read "Category: " (blogmore--current-categories))))
-  (unless (blogmore--post-p)
-    (error "This doesn't look like a blog post"))
+  (interactive (blogmore--with "Category: " (blogmore--current-categories)))
   (save-excursion
     (goto-char (point-min))
     (if (re-search-forward blogmore--category-regexp-line nil t)
@@ -162,9 +166,7 @@ date: %s
 ;;;###autoload
 (defun blogmore-add-tag (tag)
   "Add TAG to the post's tags."
-  (interactive (list (completing-read "Tag: " (blogmore--current-tags))))
-  (unless (blogmore--post-p)
-    (error "This doesn't look like a blog post"))
+  (interactive (blogmore--with "Tag: " (blogmore--current-tags)))
   (save-excursion
     (goto-char (point-min))
     (cond ((re-search-forward blogmore--tags-regexp-line nil t)
