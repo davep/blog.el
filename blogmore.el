@@ -243,6 +243,17 @@ frontmatter."
   (interactive)
   (blogmore--set-frontmatter-property "modified" (blogmore--now)))
 
+(defun blogmore-link-post (file)
+  "Insert a link to FILE from my blog."
+  (interactive (blogmore--post-picker))
+  (let ((link (replace-regexp-in-string
+               (rx bos (group (+ digit)) "-" (group (+ digit)) "-" (group (+ digit)) "-")
+               "\\1/\\2/\\3/"
+               (file-name-base (file-name-sans-extension file)))))
+    (save-excursion
+      (insert (format "[](/%s.html)" link)))
+    (forward-char)))
+
 (provide 'blogmore)
 
 ;;; blogmore.el ends here
