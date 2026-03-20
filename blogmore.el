@@ -69,8 +69,8 @@ argument is the date."
   (thread-last
     title
     downcase
-    (replace-regexp-in-string "[^a-z0-9]+" "-")
-    (replace-regexp-in-string "^-\\|-$" "")))
+    (replace-regexp-in-string (rx (+ (not (any "0-9a-z")))) "-")
+    (replace-regexp-in-string (rx (or (seq bol "-") (seq "-" eol))) "")))
 
 (defun blogmore--now ()
   "Return the current date and time as a string."
