@@ -69,8 +69,8 @@ argument is the date."
   (thread-last
     title
     downcase
-    (replace-regexp-in-string "[^a-z0-9]+" "-")
-    (replace-regexp-in-string "^-\\|-$" "")))
+    (replace-regexp-in-string (rx (+ (not (any "0-9a-z")))) "-")
+    (replace-regexp-in-string (rx (or (seq bol "-") (seq "-" eol))) "")))
 
 (defun blogmore--now ()
   "Return the current date and time as a string."
@@ -141,8 +141,8 @@ frontmatter."
 (defun blogmore--file-from-title (title)
   "Generate a filename for a blog post from the given TITLE."
   (format
-   "%s/%s-%s.md"
-   (blogmore--post-directory)
+   "%s%s-%s.md"
+   (file-name-as-directory (blogmore--post-directory))
    (format-time-string "%Y-%m-%d")
    (blogmore--slug title)))
 
@@ -199,8 +199,8 @@ frontmatter."
   (interactive
    (list
     (completing-read
-     "File: "
-     (directory-files-recursively blogmore-posts-directory "\\.md$"))))
+     "Post: "
+     (directory-files-recursively blogmore-posts-directory (rx ".md" eol)))))
   (find-file file))
 
 (defun blogmore--with (prompt existing-values)
