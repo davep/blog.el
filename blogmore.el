@@ -106,7 +106,7 @@ frontmatter."
           (list
            (point)
            (line-end-position)
-           (string-trim(buffer-substring-no-properties (point) (line-end-position))))
+           (string-trim (buffer-substring-no-properties (point) (line-end-position))))
         (goto-char (point-max))
         nil))))
 
