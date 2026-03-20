@@ -2,10 +2,10 @@
 ;; Copyright 2026 by Dave Pearson <davep@davep.org>
 
 ;; Author: Dave Pearson <davep@davep.org>
-;; Version: 1.4
+;; Version: 1.5
 ;; Keywords: convenience
 ;; URL: https://github.com/davep/blogmoe.el
-;; Package-Requires: ((emacs "27.1") (end-it "1.20"))
+;; Package-Requires: ((emacs "29.1") (end-it "1.20"))
 
 ;; This program is free software: you can redistribute it and/or modify it
 ;; under the terms of the GNU General Public License as published by the
@@ -22,8 +22,8 @@
 
 ;;; Commentary:
 ;;
-;; blog.el is a small Emacs package that provides tools for working with my
-;; personal blog. It includes commands for creating new blog posts and
+;; blogmore.el is a small Emacs package that provides tools for working with
+;; my personal blog. It includes commands for creating new blog posts and
 ;; editing existing ones, as well as some helper functions for generating
 ;; slugs and ensuring directories exist.
 
@@ -46,18 +46,6 @@ date: %s
 ---\n\n\n\n"
   "Template for new blog posts.")
 
-(defconst blogmore--category-regexp-line (rx bol "category:" (* nonl) eol)
-  "Regular expression to match category lines in blog posts.")
-
-(defconst blogmore--category-regexp (rx bol "category:" (* space) (group (* any)) eol)
-  "Regular expression for matching a category data.")
-
-(defconst blogmore--tags-regexp-line (rx bol "tags:")
-  "Regular expression to match tag lines in blog posts.")
-
-(defconst blogmore--tags-regexp (rx bol "tags:" (* space) (group (* any)) eol)
-  "Regular expression to match tag data.")
-
 (defconst blogmore--frontmatter-marker-regexp (rx bol "---" eol)
   "Regular expression to match the frontmatter marker in blog posts.")
 
@@ -68,6 +56,62 @@ date: %s
     downcase
     (replace-regexp-in-string "[^a-z0-9]+" "-")
     (replace-regexp-in-string "^-\\|-$" "")))
+
+(defun blogmore--now ()
+  "Return the current date and time as a string."
+  (format-time-string "%Y-%m-%d %H:%M:%S%z"))
+
+(defun blogmore--frontmatter-bounds ()
+  "Return the bounds of the frontmatter as a cons cell (START . END).
+
+START is the position immediately after the first frontmatter marker,
+and END is the position of the second frontmatter marker. If no
+frontmatter is found, return nil."
+  (save-excursion
+    (goto-char (point-min))
+    (when (re-search-forward blogmore--frontmatter-marker-regexp nil t)
+      (let ((start (match-end 0)))
+        (when (re-search-forward blogmore--frontmatter-marker-regexp nil t)
+          (cons start (match-beginning 0)))))))
+
+(defun blogmore--locate-frontmatter (property)
+  "Locate the line for PROPERTY in the frontmatter.
+
+If the property is found, return a list of the form (START END VALUE),
+where START and END are the bounds of the value and VALUE is the current
+value of the property. If the property is not found, return nil.
+
+If the property is found `point' is left at the beginning of the value.
+If the property is not found, `point' is left at the end of the
+frontmatter."
+  (when-let ((bounds (blogmore--frontmatter-bounds)))
+    (with-restriction (car bounds) (cdr bounds)
+      (goto-char (point-min))
+      (if (re-search-forward (rx bol (literal property) ":") nil t)
+          (list
+           (point)
+           (line-end-position)
+           (string-trim(buffer-substring-no-properties (point) (line-end-position))))
+        (goto-char (point-max))
+        nil))))
+
+(defun blogmore--get-frontmatter-property (property)
+  "Get the value of PROPERTY from the frontmatter, or nil if it doesn't exist."
+  (save-excursion
+    (when-let ((location (blogmore--locate-frontmatter property)))
+      (nth 2 location))))
+
+(defun blogmore--set-frontmatter-property (property value)
+  "Set the value of PROPERTY in the frontmatter to VALUE."
+  (save-excursion
+    (if-let ((location (blogmore--locate-frontmatter property)))
+        (progn
+          (goto-char (nth 0 location))
+          (unless (eolp)
+            (kill-line))
+          (insert (format " %s" value)))
+      (beginning-of-line)
+      (insert (format "%s: %s\n" property value)))))
 
 (defun blogmore--post-directory ()
   "Get the directory for the current year's blog posts."
@@ -89,9 +133,7 @@ date: %s
 
 (defun blogmore--post-p ()
   "Does this buffer look like a blog post?"
-  (save-excursion
-    (goto-char (point-min))
-    (looking-at "---\n")))
+  (blogmore--frontmatter-bounds))
 
 (defun blogmore--get-all (property)
   "Get a list of all values for PROPERTY from existing posts."
@@ -106,7 +148,7 @@ date: %s
     nil
     (mapcar
      (lambda (candidate)
-       (when (string-match blogmore--category-regexp candidate)
+       (when (string-match (rx bol "category:" (* space) (group (* any)) eol) candidate)
          (string-trim (match-string 1 candidate))))
      (blogmore--get-all "category")))))
 
@@ -117,7 +159,7 @@ date: %s
     (flatten-list
      (mapcar
       (lambda (candidate)
-        (when (string-match blogmore--tags-regexp candidate)
+        (when (string-match (rx bol "tags:" (* space) (group (* any)) eol) candidate)
           (split-string (match-string 1 candidate) "," t " ")))
       (blogmore--get-all "tags"))))))
 
@@ -128,11 +170,7 @@ date: %s
   (blogmore--ensure-directory)
   (find-file (blogmore--file-from-title title))
   (when (string-empty-p (buffer-string))
-    (insert
-     (format
-      blogmore-template
-      title
-      (format-time-string "%Y-%m-%d %H:%M:%S %z")))
+    (insert (format blogmore-template title (blogmore--now)))
     (forward-line -2)
     (save-excursion
       (end-it))))
@@ -157,34 +195,32 @@ date: %s
 (defun blogmore-set-category (category)
   "Set the category of the post to CATEGORY."
   (interactive (blogmore--with "Category: " (blogmore--current-categories)))
-  (save-excursion
-    (goto-char (point-min))
-    (cond ((re-search-forward blogmore--category-regexp-line nil t)
-           (replace-match (format "category: %s" category) t))
-          ((re-search-forward blogmore--frontmatter-marker-regexp nil t 2)
-           (beginning-of-line)
-           (insert (format "category: %s\n" category)))
-          (t
-           (error "Could not find a location to insert the category")))))
+  (blogmore--set-frontmatter-property "category" category))
 
 ;;;###autoload
 (defun blogmore-add-tag (tag)
   "Add TAG to the post's tags."
   (interactive (blogmore--with "Tag: " (blogmore--current-tags)))
-  (save-excursion
-    (goto-char (point-min))
-    (cond ((re-search-forward blogmore--tags-regexp-line nil t)
-           (let* ((existing-tags (save-match-data
-                                   (string-split (buffer-substring (point) (line-end-position)) "," t " ")))
-                  (new-tags (sort (delete-dups (append existing-tags (list tag))))))
-             (unless (eolp)
-               (kill-line))
-             (replace-match (format "tags: %s" (string-join new-tags ", ")) t)))
-          ((re-search-forward blogmore--frontmatter-marker-regexp nil t 2)
-           (beginning-of-line)
-           (insert (format "tags: %s\n" tag)))
-          (t
-           (error "Could not find a location to insert the tag")))))
+  (blogmore--set-frontmatter-property
+   "tags"
+   (string-join
+    (sort
+     (delete-dups
+      (append
+       (string-split (or (blogmore--get-frontmatter-property "tags") "") "," t " ")
+       (list tag)))) ", ")))
+
+;;;###autoload
+(defun blogmore-update-date ()
+  "Update the date of the post to the current date and time."
+  (interactive)
+  (blogmore--set-frontmatter-property "date" (blogmore--now)))
+
+;;;###autoload
+(defun blogmore-update-modified ()
+  "Update the modified date of the post to the current date and time."
+  (interactive)
+  (blogmore--set-frontmatter-property "modified" (blogmore--now)))
 
 (provide 'blogmore)
 
