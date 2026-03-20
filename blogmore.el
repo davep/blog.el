@@ -156,12 +156,13 @@ date: %s
   (interactive (blogmore--with "Category: " (blogmore--current-categories)))
   (save-excursion
     (goto-char (point-min))
-    (if (re-search-forward blogmore--category-regexp-line nil t)
-        (replace-match (format "category: %s" category) t)
-      (unless (re-search-forward "^---$" nil t 2)
-        (error "Could not find a location to insert the category"))
-      (beginning-of-line)
-      (insert (format "category: %s\n" category)))))
+    (cond ((re-search-forward blogmore--category-regexp-line nil t)
+           (replace-match (format "category: %s" category) t))
+          ((re-search-forward "^---$" nil t 2)
+           (beginning-of-line)
+           (insert (format "category: %s\n" category)))
+          (t
+           (error "Could not find a location to insert the category")))))
 
 ;;;###autoload
 (defun blogmore-add-tag (tag)
