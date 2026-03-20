@@ -46,14 +46,8 @@ date: %s
 ---\n\n\n\n"
   "Template for new blog posts.")
 
-(defconst blogmore--category-regexp-line (rx bol "category:" (* nonl) eol)
-  "Regular expression to match category lines in blog posts.")
-
 (defconst blogmore--category-regexp (rx bol "category:" (* space) (group (* any)) eol)
   "Regular expression for matching a category data.")
-
-(defconst blogmore--tags-regexp-line (rx bol "tags:")
-  "Regular expression to match tag lines in blog posts.")
 
 (defconst blogmore--tags-regexp (rx bol "tags:" (* space) (group (* any)) eol)
   "Regular expression to match tag data.")
