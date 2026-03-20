@@ -2,10 +2,10 @@
 ;; Copyright 2026 by Dave Pearson <davep@davep.org>
 
 ;; Author: Dave Pearson <davep@davep.org>
-;; Version: 1.5
+;; Version: 1.6
 ;; Keywords: convenience
-;; URL: https://github.com/davep/blogmoe.el
-;; Package-Requires: ((emacs "29.1") (end-it "1.20"))
+;; URL: https://github.com/davep/blogmore.el
+;; Package-Requires: ((emacs "29.1"))
 
 ;; This program is free software: you can redistribute it and/or modify it
 ;; under the terms of the GNU General Public License as published by the
@@ -27,24 +27,39 @@
 ;; editing existing ones, as well as some helper functions for generating
 ;; slugs and ensuring directories exist.
 
-;;; Code:
+
+;; Configuration:
 
-(require 'end-it)
+(defgroup blogmore ()
+  "Tools for working with my personal blog."
+  :group 'convenience
+  :prefix "blogmore-")
 
-(defconst blogmore-directory "~/write/davep.github.com/"
-  "Root directory for my blog.")
+(defcustom blogmore-posts-directory "~/write/davep.github.com/content/posts/"
+  "The directory where blog posts are stored."
+  :type 'directory
+  :group 'blogmore)
 
-(defconst blogmore-posts-directory (concat blogmore-directory "content/posts")
-  "Directory where blog posts are stored.")
-
-(defconst blogmore-template "---
-layout: post
-title: %s
+(defcustom blogmore-template "---
+title: %1$s
+date: %2$s
 category:
 tags:
-date: %s
 ---\n\n\n\n"
-  "Template for new blog posts.")
+  "Template for new blog posts.
+
+Used with `format', where the first argument is the title and the second
+argument is the date."
+  :type 'string
+  :group 'blogmore)
+
+(defcustom blogmore-new-post-hook nil
+  "Hook run after creating a new blog post."
+  :type 'hook
+  :group 'blogmore)
+
+
+;;; Code:
 
 (defconst blogmore--frontmatter-marker-regexp (rx bol "---" eol)
   "Regular expression to match the frontmatter marker in blog posts.")
@@ -91,7 +106,7 @@ frontmatter."
           (list
            (point)
            (line-end-position)
-           (string-trim(buffer-substring-no-properties (point) (line-end-position))))
+           (string-trim (buffer-substring-no-properties (point) (line-end-position))))
         (goto-char (point-max))
         nil))))
 
@@ -115,7 +130,7 @@ frontmatter."
 
 (defun blogmore--post-directory ()
   "Get the directory for the current year's blog posts."
-  (format "%s/%s" blogmore-posts-directory (format-time-string "%Y")))
+  (format "%s%s" (file-name-as-directory blogmore-posts-directory) (format-time-string "%Y")))
 
 (defun blogmore--ensure-directory ()
   "Ensure that the given directory exists."
@@ -163,6 +178,9 @@ frontmatter."
           (split-string (match-string 1 candidate) "," t " ")))
       (blogmore--get-all "tags"))))))
 
+
+;; Commands:
+
 ;;;###autoload
 (defun blogmore-new (title)
   "Start a new blog post with a title of TITLE."
@@ -173,7 +191,7 @@ frontmatter."
     (insert (format blogmore-template title (blogmore--now)))
     (forward-line -2)
     (save-excursion
-      (end-it))))
+      (run-hooks 'blogmore-new-post-hook))))
 
 ;;;###autoload
 (defun blogmore-edit (file)
