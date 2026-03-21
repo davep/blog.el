@@ -243,6 +243,7 @@ frontmatter."
   (interactive)
   (blogmore--set-frontmatter-property "modified" (blogmore--now)))
 
+;;;###autoload
 (defun blogmore-link-post (file)
   "Insert a link to FILE from my blog."
   (interactive (blogmore--post-picker))
