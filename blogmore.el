@@ -222,6 +222,12 @@ frontmatter."
     (insert (format "[](%s)" link)))
   (forward-char))
 
+(defun blogmore--with (prompt existing-values)
+  "Prompt the user with PROMPT and offer EXISTING-VALUES as completions."
+  (if (blogmore--post-p)
+      (list (completing-read prompt existing-values))
+    (error "This doesn't look like a blog post")))
+
 
 ;; Commands:
 
@@ -242,12 +248,6 @@ frontmatter."
   "Edit FILE from my blog."
   (interactive (blogmore--post-picker))
   (find-file file))
-
-(defun blogmore--with (prompt existing-values)
-  "Prompt the user with PROMPT and offer EXISTING-VALUES as completions."
-  (if (blogmore--post-p)
-      (list (completing-read prompt existing-values))
-    (error "This doesn't look like a blog post")))
 
 ;;;###autoload
 (defun blogmore-set-category (category)
