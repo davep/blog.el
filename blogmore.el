@@ -58,6 +58,11 @@ argument is the date."
   :type 'hook
   :group 'blogmore)
 
+(defcustom blogmore-category-link-format "/category/%s/"
+  "Format string for a link to a category."
+  :type 'string
+  :group 'blogmore)
+
 (defcustom blogmore-tag-link-format "/tag/%s/"
   "Format string for a link to a tag."
   :type 'string
@@ -190,6 +195,12 @@ frontmatter."
     "Post: "
     (directory-files-recursively blogmore-posts-directory (rx ".md" eol)))))
 
+(defun blogmore--insert-link (link)
+  "Insert Markdown to link to LINK.."
+  (save-excursion
+    (insert (format "[](%s)" link)))
+  (forward-char))
+
 
 ;; Commands:
 
@@ -261,12 +272,16 @@ frontmatter."
     (forward-char)))
 
 ;;;###autoload
+(defun blogmore-insert-category (category)
+  "Insert a link to CATEGORY on my blog."
+  (interactive (blogmore--with "Category: " (blogmore--current-categories)))
+  (blogmore--insert-link (format blogmore-category-link-format (blogmore--slug category))))
+
+;;;###autoload
 (defun blogmore-insert-tag (tag)
   "Insert a link to TAG on my blog."
   (interactive (blogmore--with "Tag: " (blogmore--current-tags)))
-  (save-excursion
-    (insert (format "[](%s)" (format blogmore-tag-link-format (blogmore--slug tag)))))
-  (forward-char))
+  (blogmore--insert-link (format blogmore-tag-link-format (blogmore--slug tag))))
 
 (provide 'blogmore)
 
