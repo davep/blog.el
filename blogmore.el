@@ -39,9 +39,10 @@
   :group 'convenience
   :prefix "blogmore-")
 
-(defcustom blogmore-posts-directory "~/write/davep.github.com/content/posts/"
-  "The directory where blog posts are stored."
-  :type 'directory
+(defcustom blogmore-blogs nil
+  "An association list of blogs to work on and their post paths."
+  :type '(alist :key-type (string :tag "Blog")
+                :value-type (directory :tag "Posts"))
   :group 'blogmore)
 
 (defcustom blogmore-template "---
@@ -99,6 +100,26 @@ argument is the date."
 
 
 ;;; Code:
+
+(defvar blogmore--current-blog nil
+  "The current blog being worked on.")
+
+(defun blogmore--posts-directory ()
+  "Get the posts directory for the current blog."
+  (cond (blogmore--current-blog
+         ;; The user has chosen a blog, so use that.
+         (cdr blogmore--current-blog))
+        ((= (length blogmore-blogs) 1)
+         ;; There's only one blog defined, so use that.
+         (cdr (car blogmore-blogs)))
+        (blogmore-blogs
+         ;; There are multiple blogs defined, so we can't work out the best
+         ;; option.
+         (error "Please select a blog to work on first; see `blogmore-work-on'"))
+        (t
+         ;; There are no blogs defined, so we can't work out the best
+         ;; option.
+         (error "No blogs defined; please add one to `blogmore-blogs'"))))
 
 (defconst blogmore--frontmatter-marker-regexp (rx bol "---" eol)
   "Regular expression to match the frontmatter marker in blog posts.")
@@ -169,7 +190,7 @@ frontmatter."
 
 (defun blogmore--post-directory ()
   "Get the directory for the current year's blog posts."
-  (format "%s%s" (file-name-as-directory blogmore-posts-directory) (format-time-string "%Y")))
+  (format "%s%s" (file-name-as-directory (blogmore--posts-directory)) (format-time-string "%Y")))
 
 (defun blogmore--ensure-directory ()
   "Ensure that the given directory exists."
@@ -193,7 +214,7 @@ frontmatter."
   "Get a list of all values for PROPERTY from existing posts."
   (delete-dups
    (split-string
-    (shell-command-to-string (format "grep -h '^%s:' %s/**/*.md" property blogmore-posts-directory)) "\n" t)))
+    (shell-command-to-string (format "grep -h '^%s:' %s/**/*.md" property (blogmore--posts-directory))) "\n" t)))
 
 (defun blogmore--current-categories ()
   "Get a list of categories from existing posts."
@@ -222,7 +243,7 @@ frontmatter."
   (list
    (completing-read
     "Post: "
-    (directory-files-recursively blogmore-posts-directory (rx ".md" eol)))))
+    (directory-files-recursively (blogmore--posts-directory) (rx ".md" eol)))))
 
 (defun blogmore--insert-link (link)
   "Insert Markdown to link to LINK.."
@@ -238,6 +259,12 @@ frontmatter."
 
 
 ;; Commands:
+
+;;;###autoload
+(defun blogmore-work-on (blog)
+  "Set the current blog to BLOG."
+  (interactive (list (completing-read "Blog: " blogmore-blogs nil t)))
+  (setq blogmore--current-blog (assoc blog blogmore-blogs)))
 
 ;;;###autoload
 (defun blogmore-new (title)
