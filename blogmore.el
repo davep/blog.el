@@ -40,9 +40,61 @@
   :prefix "blogmore-")
 
 (defcustom blogmore-blogs nil
-  "An association list of blogs to work on and their post paths."
-  :type '(alist :key-type (string :tag "Blog")
-                :value-type (directory :tag "Posts"))
+  "An association list of blogs to work on and their post paths.
+
+The keys are the names of the blogs, and the values are lists of the form
+  (POSTS-DIRECTORY
+   POST-MAKER-FUNCTION
+   CATEGORY-MAKER-FUNCTION
+   TAG-MAKER-FUNCTION
+   POST-LINK-FORMAT
+   CATEGORY-LINK-FORMAT
+   TAG-LINK-FORMAT
+
+Where:
+- POSTS-DIRECTORY is the directory where the blog's posts are stored.
+- POST-MAKER-FUNCTION is a function that takes a filename and returns a
+  string to be used in the post's URL. If nil,
+  `blogmore-default-post-maker-function' is used.
+- CATEGORY-MAKER-FUNCTION is a function that takes a category name and
+  returns a string to be used in the category's URL. If nil,
+  `blogmore-default-category-maker-function' is used.
+- TAG-MAKER-FUNCTION is a function that takes a tag name and returns a
+  string to be used in the tag's URL. If nil,
+  `blogmore-default-tag-maker-function' is used.
+- POST-LINK-FORMAT is a format string for the post's URL, where % is
+  replaced with the value returned by the post maker function. If nil,
+  `blogmore-default-post-link-format' is used.
+- CATEGORY-LINK-FORMAT is a format string for the category's URL, where
+  % is replaced with the value returned by the category maker function.
+  If nil, `blogmore-default-category-link-format' is used.
+- TAG-LINK-FORMAT is a format string for the tag's URL, where % is
+  replaced with the value returned by the tag maker function. If nil,
+  `blogmore-default-tag-link-format' is used."
+  :type
+  '(alist :key-type
+          (string :tag "Blog")
+          :value-type
+          (list :tag "Settings"
+                (directory :tag "Posts")
+                (choice :tag "Post maker function"
+                        (const :tag "Default" nil)
+                        (function :tag "Custom"))
+                (choice :tag "Category maker function"
+                        (const :tag "Default" nil)
+                        (function :tag "Custom"))
+                (choice :tag "Tag maker function"
+                        (const :tag "Default" nil)
+                        (function :tag "Custom"))
+                (choice :tag "Post link format"
+                        (const :tag "Default" nil)
+                        (string :tag "Custom"))
+                (choice :tag "Category link format"
+                        (const :tag "Default" nil)
+                        (string :tag "Custom"))
+                (choice :tag "Tag link format"
+                        (const :tag "Default" nil)
+                        (string :tag "Custom"))))
   :group 'blogmore)
 
 (defcustom blogmore-template "---
@@ -63,38 +115,38 @@ argument is the date."
   :type 'hook
   :group 'blogmore)
 
-(defcustom blogmore-post-maker-function
+(defcustom blogmore-default-post-maker-function
   (lambda (file)
     (replace-regexp-in-string
      (rx bos (group (+ digit)) "-" (group (+ digit)) "-" (group (+ digit)) "-")
      "\\1/\\2/\\3/"
      (file-name-base (file-name-sans-extension file))))
-  "Function to generate a link for a blog post from its filename."
+  "Default function to generate a link for a blog post from its filename."
   :type 'function
   :group 'blogmore)
 
-(defcustom blogmore-category-maker-function #'blogmore--slug
-  "Function to generate a slug for a category."
+(defcustom blogmore-default-category-maker-function #'blogmore--slug
+  "Default function to generate a slug for a category."
   :type 'function
   :group 'blogmore)
 
-(defcustom blogmore-tag-maker-function #'blogmore--slug
-  "Function to generate a slug for a tag."
+(defcustom blogmore-default-tag-maker-function #'blogmore--slug
+  "Default function to generate a slug for a tag."
   :type 'function
   :group 'blogmore)
 
-(defcustom blogmore-post-link-format "/%s.html"
-  "Format string for a link to a blog post."
+(defcustom blogmore-default-post-link-format "/%s.html"
+  "Default format string for a link to a blog post."
   :type 'string
   :group 'blogmore)
 
-(defcustom blogmore-category-link-format "/category/%s/"
-  "Format string for a link to a category."
+(defcustom blogmore-default-category-link-format "/category/%s/"
+  "Default format string for a link to a category."
   :type 'string
   :group 'blogmore)
 
-(defcustom blogmore-tag-link-format "/tag/%s/"
-  "Format string for a link to a tag."
+(defcustom blogmore-default-tag-link-format "/tag/%s/"
+  "Default format string for a link to a tag."
   :type 'string
   :group 'blogmore)
 
@@ -123,11 +175,39 @@ argument is the date."
 
 (defun blogmore--blog-title ()
   "Get the title of the current blog."
-  (car (blogmore--chosen-blog)))
+  (nth 0 (blogmore--chosen-blog)))
 
 (defun blogmore--posts-directory ()
   "Get the posts directory for the current blog."
-  (cdr (blogmore--chosen-blog)))
+  (nth 1 (blogmore--chosen-blog)))
+
+(defun blogmore--get-blog-data (index default)
+  "Get the data at INDEX for the current blog, or DEFAULT if it isn't set."
+  (or (nth index (blogmore--chosen-blog)) default))
+
+(defun blogmore--post-maker-function ()
+  "Get the post maker function for the current blog."
+  (blogmore--get-blog-data 2 blogmore-default-post-maker-function))
+
+(defun blogmore--category-maker-function ()
+  "Get the category maker function for the current blog."
+  (blogmore--get-blog-data 3 blogmore-default-category-maker-function))
+
+(defun blogmore--tag-maker-function ()
+  "Get the tag maker function for the current blog."
+  (blogmore--get-blog-data 4 blogmore-default-tag-maker-function))
+
+(defun blogmore--post-link-format ()
+  "Get the post link format for the current blog."
+  (blogmore--get-blog-data 5 blogmore-default-post-link-format))
+
+(defun blogmore--category-link-format ()
+  "Get the category link format for the current blog."
+  (blogmore--get-blog-data 6 blogmore-default-category-link-format))
+
+(defun blogmore--tag-link-format ()
+  "Get the tag link format for the current blog."
+  (blogmore--get-blog-data 7 blogmore-default-tag-link-format))
 
 (defconst blogmore--frontmatter-marker-regexp (rx bol "---" eol)
   "Regular expression to match the frontmatter marker in blog posts.")
@@ -328,16 +408,16 @@ frontmatter."
   "Insert a link to FILE from my blog."
   (interactive (blogmore--post-picker))
   (blogmore--insert-link
-   (format blogmore-post-link-format
-           (funcall blogmore-post-maker-function file))))
+   (format (blogmore--post-link-format)
+           (funcall (blogmore--post-maker-function) file))))
 
 ;;;###autoload
 (defun blogmore-link-category (category)
   "Insert a link to CATEGORY on my blog."
   (interactive (blogmore--with "Category" (blogmore--current-categories)))
   (blogmore--insert-link
-   (format blogmore-category-link-format
-           (funcall blogmore-category-maker-function category)))
+   (format (blogmore--category-link-format)
+           (funcall (blogmore--category-maker-function) category)))
   (save-excursion
     (insert category)))
 
@@ -346,8 +426,8 @@ frontmatter."
   "Insert a link to TAG on my blog."
   (interactive (blogmore--with "Tag" (blogmore--current-tags)))
   (blogmore--insert-link
-   (format blogmore-tag-link-format
-           (funcall blogmore-tag-maker-function tag)))
+   (format (blogmore--tag-link-format)
+           (funcall (blogmore--tag-maker-function) tag)))
   (save-excursion
     (insert tag)))
 
