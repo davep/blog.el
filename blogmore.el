@@ -22,14 +22,14 @@
 
 ;;; Commentary:
 ;;
-;; blogmore.el is a small Emacs package that provides tools for working with
-;; my personal blog. It includes commands for creating new blog posts and
-;; editing existing ones, as well as commands for inserting category and tag
-;; links.
+;; blogmore.el is a small Emacs package that provides tools that help when
+;; I'm writing blog posts for my personal blogs. It is written as a
+;; companion for BlogMore <https://blogmore.davep.dev/>, the static site
+;; generator I use to create my blogs.
 ;;
-;; It is written as a companion for BlogMore <https://blogmore.davep.dev/>,
-;; the static site generator I use to create my blog.
-
+;; It's designed to work out of the box with any blog that has a similar
+;; structure to mine, but also design with plenty of customisation options
+;; to allow it to be used with a wide variety of different setups.
 
 
 ;; Configuration:
