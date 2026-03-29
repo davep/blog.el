@@ -44,6 +44,7 @@
 
 The keys are the names of the blogs, and the values are lists of the form
   (POSTS-DIRECTORY
+   POST-TEMPLATE
    POST-MAKER-FUNCTION
    CATEGORY-MAKER-FUNCTION
    TAG-MAKER-FUNCTION
@@ -53,6 +54,8 @@ The keys are the names of the blogs, and the values are lists of the form
 
 Where:
 - POSTS-DIRECTORY is the directory where the blog's posts are stored.
+- POST-TEMPLATE is a template for new posts. If nil,
+  `blogmore-default-template' is used.
 - POST-MAKER-FUNCTION is a function that takes a filename and returns a
   string to be used in the post's URL. If nil,
   `blogmore-default-post-maker-function' is used.
@@ -77,6 +80,9 @@ Where:
           :value-type
           (list :tag "Settings"
                 (directory :tag "Posts")
+                (choice :tag "Post template"
+                        (const :tag "Default" nil)
+                        (string :tag "Custom"))
                 (choice :tag "Post maker function"
                         (const :tag "Default" nil)
                         (function :tag "Custom"))
@@ -97,13 +103,13 @@ Where:
                         (string :tag "Custom"))))
   :group 'blogmore)
 
-(defcustom blogmore-template "---
+(defcustom blogmore-default-template "---
 title: %1$s
 date: %2$s
 category:
 tags:
 ---\n\n\n\n"
-  "Template for new blog posts.
+  "Default template for new blog posts.
 
 Used with `format', where the first argument is the title and the second
 argument is the date."
@@ -185,29 +191,33 @@ argument is the date."
   "Get the data at INDEX for the current blog, or DEFAULT if it isn't set."
   (or (nth index (blogmore--chosen-blog)) default))
 
+(defun blogmore--post-template ()
+  "Get the post template for the current blog."
+  (blogmore--get-blog-data 2 blogmore-default-template))
+
 (defun blogmore--post-maker-function ()
   "Get the post maker function for the current blog."
-  (blogmore--get-blog-data 2 blogmore-default-post-maker-function))
+  (blogmore--get-blog-data 3 blogmore-default-post-maker-function))
 
 (defun blogmore--category-maker-function ()
   "Get the category maker function for the current blog."
-  (blogmore--get-blog-data 3 blogmore-default-category-maker-function))
+  (blogmore--get-blog-data 4 blogmore-default-category-maker-function))
 
 (defun blogmore--tag-maker-function ()
   "Get the tag maker function for the current blog."
-  (blogmore--get-blog-data 4 blogmore-default-tag-maker-function))
+  (blogmore--get-blog-data 5 blogmore-default-tag-maker-function))
 
 (defun blogmore--post-link-format ()
   "Get the post link format for the current blog."
-  (blogmore--get-blog-data 5 blogmore-default-post-link-format))
+  (blogmore--get-blog-data 6 blogmore-default-post-link-format))
 
 (defun blogmore--category-link-format ()
   "Get the category link format for the current blog."
-  (blogmore--get-blog-data 6 blogmore-default-category-link-format))
+  (blogmore--get-blog-data 7 blogmore-default-category-link-format))
 
 (defun blogmore--tag-link-format ()
   "Get the tag link format for the current blog."
-  (blogmore--get-blog-data 7 blogmore-default-tag-link-format))
+  (blogmore--get-blog-data 8 blogmore-default-tag-link-format))
 
 (defconst blogmore--frontmatter-marker-regexp (rx bol "---" eol)
   "Regular expression to match the frontmatter marker in blog posts.")
@@ -361,7 +371,7 @@ frontmatter."
   (blogmore--ensure-directory)
   (find-file (blogmore--file-from-title title))
   (when (string-empty-p (buffer-string))
-    (insert (format blogmore-template title (blogmore--now)))
+    (insert (format (blogmore--post-template) title (blogmore--now)))
     (forward-line -2)
     (save-excursion
       (run-hooks 'blogmore-new-post-hook))))
