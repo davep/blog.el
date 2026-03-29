@@ -32,6 +32,10 @@
 ;; to allow it to be used with a wide variety of different setups.
 
 
+(eval-when-compile
+  (require 'cl-lib))
+
+
 ;; Configuration:
 
 (defgroup blogmore ()
@@ -159,6 +163,36 @@ argument is the date."
 
 ;;; Code:
 
+(cl-defstruct (blogmore--blog (:type list))
+  "A struct representing the settings for a single blog."
+  (blog-title
+   nil
+   :documentation "The title of the blog")
+  (posts-directory
+   nil
+   :documentation "The directory where the blog's posts are stored")
+  (post-template
+   nil
+   :documentation "A template for new posts")
+  (post-maker-function
+   nil
+   :documentation "A function for making a post's URL")
+  (category-maker-function
+   nil
+   :documentation "A function for making a category's URL")
+  (tag-maker-function
+   nil
+   :documentation "A function for making a tag's URL")
+  (post-link-format
+   nil
+   :documentation "Format string for a link to a postL")
+  (category-link-format
+   nil
+   :documentation "Format string for a link to a category")
+  (tag-link-format
+   nil
+   :documentation "Format string for a link to a tag"))
+
 (defvar blogmore--current-blog nil
   "The current blog being worked on.")
 
@@ -181,43 +215,39 @@ argument is the date."
 
 (defun blogmore--blog-title ()
   "Get the title of the current blog."
-  (nth 0 (blogmore--chosen-blog)))
+  (blogmore--blog-blog-title (blogmore--chosen-blog)))
 
 (defun blogmore--posts-directory ()
   "Get the posts directory for the current blog."
-  (nth 1 (blogmore--chosen-blog)))
-
-(defun blogmore--get-blog-data (index default)
-  "Get the data at INDEX for the current blog, or DEFAULT if it isn't set."
-  (or (nth index (blogmore--chosen-blog)) default))
+  (blogmore--blog-posts-directory (blogmore--chosen-blog)))
 
 (defun blogmore--post-template ()
   "Get the post template for the current blog."
-  (blogmore--get-blog-data 2 blogmore-default-template))
+  (or (blogmore--blog-post-template (blogmore--chosen-blog)) blogmore-default-template))
 
 (defun blogmore--post-maker-function ()
   "Get the post maker function for the current blog."
-  (blogmore--get-blog-data 3 blogmore-default-post-maker-function))
+  (or (blogmore--blog-post-maker-function (blogmore--chosen-blog)) blogmore-default-post-maker-function))
 
 (defun blogmore--category-maker-function ()
   "Get the category maker function for the current blog."
-  (blogmore--get-blog-data 4 blogmore-default-category-maker-function))
+  (or (blogmore--blog-category-maker-function (blogmore--chosen-blog)) blogmore-default-category-maker-function))
 
 (defun blogmore--tag-maker-function ()
   "Get the tag maker function for the current blog."
-  (blogmore--get-blog-data 5 blogmore-default-tag-maker-function))
+  (or (blogmore--blog-tag-maker-function (blogmore--chosen-blog)) blogmore-default-tag-maker-function))
 
 (defun blogmore--post-link-format ()
   "Get the post link format for the current blog."
-  (blogmore--get-blog-data 6 blogmore-default-post-link-format))
+  (or (blogmore--blog-post-link-format (blogmore--chosen-blog)) blogmore-default-post-link-format))
 
 (defun blogmore--category-link-format ()
   "Get the category link format for the current blog."
-  (blogmore--get-blog-data 7 blogmore-default-category-link-format))
+  (or (blogmore--blog-category-link-format (blogmore--chosen-blog)) blogmore-default-category-link-format))
 
 (defun blogmore--tag-link-format ()
   "Get the tag link format for the current blog."
-  (blogmore--get-blog-data 8 blogmore-default-tag-link-format))
+  (or (blogmore--blog-tag-link-format (blogmore--chosen-blog)) blogmore-default-tag-link-format))
 
 (defconst blogmore--frontmatter-marker-regexp (rx bol "---" eol)
   "Regular expression to match the frontmatter marker in blog posts.")
