@@ -2,7 +2,7 @@
 ;; Copyright 2026 by Dave Pearson <davep@davep.org>
 
 ;; Author: Dave Pearson <davep@davep.org>
-;; Version: 2.0
+;; Version: 2.1
 ;; Keywords: convenience
 ;; URL: https://github.com/davep/blogmore.el
 ;; Package-Requires: ((emacs "29.1"))
@@ -342,7 +342,12 @@ frontmatter."
   "Get a list of all values for PROPERTY from existing posts."
   (delete-dups
    (split-string
-    (shell-command-to-string (format "grep -h '^%s:' %s/**/*.md" property (blogmore--posts-directory))) "\n" t)))
+    (shell-command-to-string
+     (format
+      (if (executable-find "rg")
+          "rg --no-filename --no-line-number --no-heading \"^%1$s\" %2$s -g \"*.md\""
+        "find %2$s -type f -name \"*.md\" -exec grep -hi \"^%1$s:\" /dev/null {} +")
+      property (blogmore--posts-directory))) "\n" t)))
 
 (defun blogmore--current-categories ()
   "Get a list of categories from existing posts."
