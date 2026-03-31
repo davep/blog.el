@@ -434,11 +434,14 @@ frontmatter."
   (blogmore--set-frontmatter-property
    "tags"
    (string-join
-    (sort
-     (delete-dups
+    (seq-uniq
+     ;; Sorting *before* making unique because I want to favour upper-case
+     ;; over lower-case in the resulting list of tags.
+     (sort
       (append
        (string-split (or (blogmore--get-frontmatter-property "tags") "") "," t " ")
-       (list tag)))) ", ")))
+       (list tag)))
+     #'string-equal-ignore-case) ", ")))
 
 ;;;###autoload
 (defun blogmore-update-date ()
