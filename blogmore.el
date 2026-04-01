@@ -28,7 +28,7 @@
 ;; generator I use to create my blogs.
 ;;
 ;; It's designed to work out of the box with any blog that has a similar
-;; structure to mine, but also design with plenty of customisation options
+;; structure to mine, but also designed with plenty of customisation options
 ;; to allow it to be used with a wide variety of different setups.
 
 
