@@ -391,7 +391,8 @@ if its value is not true, its value is set to true."
      (lambda (candidate)
        (when (string-match (rx bol "category:" (* space) (group (* any)) eol) candidate)
          (string-trim (match-string 1 candidate))))
-     (blogmore--get-all "category")))))
+     (blogmore--get-all "category")))
+   #'string-lessp))
 
 (defun blogmore--current-tags ()
   "Get a list of tags from existing posts."
@@ -404,7 +405,8 @@ if its value is not true, its value is set to true."
       (lambda (candidate)
         (when (string-match (rx bol "tags:" (* space) (group (* any)) eol) candidate)
           (split-string (match-string 1 candidate) "," t " ")))
-      (blogmore--get-all "tags"))))
+      (blogmore--get-all "tags")))
+    #'string-lessp)
    #'string-equal-ignore-case))
 
 (defun blogmore--post-picker ()
@@ -481,7 +483,8 @@ if its value is not true, its value is set to true."
      (sort
       (append
        (string-split (or (blogmore--get-frontmatter-property "tags") "") "," t " ")
-       (list tag)))
+       (list tag))
+      #'string-lessp)
      #'string-equal-ignore-case) ", ")))
 
 ;;;###autoload
