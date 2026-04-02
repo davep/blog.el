@@ -291,6 +291,16 @@ frontmatter."
   (save-excursion
     (blogmore--locate-frontmatter property)))
 
+(defun blogmore--post-p ()
+  "Does this buffer look like a blog post?"
+  (blogmore--frontmatter-bounds))
+
+(defmacro blogmore--within-post (&rest body)
+  "Execute BODY within a blog post, or signal an error if we're not in a blog post."
+  `(if (blogmore--post-p)
+       (progn ,@body)
+     (error "This doesn't look like a blog post")))
+
 (cl-defstruct (blogmore--frontmatter-property-location (:type list))
   "A struct representing the location of a property in the frontmatter."
   (start
@@ -359,10 +369,6 @@ if its value is not true, its value is set to true."
    (format-time-string "%Y-%m-%d")
    (blogmore--slug title)))
 
-(defun blogmore--post-p ()
-  "Does this buffer look like a blog post?"
-  (blogmore--frontmatter-bounds))
-
 (defun blogmore--get-all (property)
   "Get a list of all values for PROPERTY from existing posts."
   (seq-uniq
@@ -412,12 +418,6 @@ if its value is not true, its value is set to true."
   (save-excursion
     (insert (format "[](%s)" link)))
   (forward-char))
-
-(defmacro blogmore--within-post (&rest body)
-  "Execute BODY within a blog post, or signal an error if we're not in a blog post."
-  `(if (blogmore--post-p)
-       (progn ,@body)
-     (error "This doesn't look like a blog post")))
 
 (defun blogmore--with (prompt existing-values)
   "Prompt the user with PROMPT and offer EXISTING-VALUES as completions."
