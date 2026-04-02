@@ -330,11 +330,14 @@ frontmatter."
       (kill-line))))
 
 (defun blogmore--toggle-frontmatter-property (property)
-  "Toggle the existence of PROPERTY in the frontmatter.
+  "Toggle the existence of boolean PROPERTY in the frontmatter.
 
-If the property exists, it is removed. If it doesn't exist, it is added
-with a value of true."
-  (if (blogmore--frontmatter-p property)
+If the property doesn't exist, it is added with a value of true. If it
+does exist and if its value is true, it is removed. If it does exist and
+if its value is not true, its value is set to true."
+  (if (and
+       (blogmore--frontmatter-p property)
+       (string-equal-ignore-case (blogmore--get-frontmatter-property property) "true"))
       (blogmore--remove-frontmatter-property property)
     (blogmore--set-frontmatter-property property "true")))
 
