@@ -293,8 +293,12 @@ frontmatter."
     (blogmore--locate-frontmatter property)))
 
 (defun blogmore--post-p ()
-  "Does this buffer look like a blog post?"
+  "Return non-nil if the current buffer looks like a blog post."
   (blogmore--frontmatter-bounds))
+
+(defun blogmore--outwith-post-p ()
+  "Return non-nil if the current buffer doesn't look like a blog post."
+  (not (blogmore--post-p)))
 
 (defmacro blogmore--within-post (&rest body)
   "Execute BODY within a blog post, or signal an error if we're not in a blog post."
