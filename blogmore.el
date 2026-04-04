@@ -439,7 +439,9 @@ if its value is not true, its value is set to true."
   "Set the current blog to BLOG."
   (interactive (list (completing-read "Blog: " blogmore-blogs nil t)))
   (setq blogmore--current-blog (assoc blog blogmore-blogs))
-  (message "Working on %s" blog))
+  (message "Now working on %s" blog)
+  (when transient-current-prefix
+    (call-interactively #'blogmore)))
 
 ;;;###autoload
 (defun blogmore-new (title)
