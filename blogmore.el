@@ -540,15 +540,15 @@ if its value is not true, its value is set to true."
    ["Post"
     ("n" "New post" blogmore-new)
     ("e" "Edit post" blogmore-edit)
-    ("d" "Toggle draft status" blogmore-toggle-draft)
-    ("c" "Set post category" blogmore-set-category)
-    ("t" "Add tag" blogmore-add-tag)
-    ("u d" "Update date" blogmore-update-date)
-    ("u m" "Update modified date" blogmore-update-modified)]
+    ("d" "Toggle draft status" blogmore-toggle-draft :inapt-if blogmore--outwith-post-p)
+    ("c" "Set post category" blogmore-set-category :inapt-if blogmore--outwith-post-p)
+    ("t" "Add tag" blogmore-add-tag :inapt-if blogmore--outwith-post-p)
+    ("u d" "Update date" blogmore-update-date :inapt-if blogmore--outwith-post-p)
+    ("u m" "Update modified date" blogmore-update-modified :inapt-if blogmore--outwith-post-p)]
    ["Links"
-    ("l c" "Link to a category" blogmore-link-category)
-    ("l p" "Link to a post" blogmore-link-post)
-    ("l t" "Link to a tag" blogmore-link-tag)]])
+    ("l c" "Link to a category" blogmore-link-category :inapt-if blogmore--outwith-post-p)
+    ("l p" "Link to a post" blogmore-link-post :inapt-if blogmore--outwith-post-p)
+    ("l t" "Link to a tag" blogmore-link-tag :inapt-if blogmore--outwith-post-p)]])
 
 (provide 'blogmore)
 
