@@ -296,10 +296,6 @@ frontmatter."
   "Return non-nil if the current buffer looks like a blog post."
   (blogmore--frontmatter-bounds))
 
-(defun blogmore--outwith-post-p ()
-  "Return non-nil if the current buffer doesn't look like a blog post."
-  (not (blogmore--post-p)))
-
 (defmacro blogmore--within-post (&rest body)
   "Execute BODY within a blog post, or signal an error if we're not in a blog post."
   `(if (blogmore--post-p)
@@ -544,17 +540,17 @@ if its value is not true, its value is set to true."
    ["Blog"
     ("b"  "Select blog" blogmore-work-on)]
    ["Post"
-    ("n" "New post" blogmore-new)
-    ("e" "Edit post" blogmore-edit)
-    ("d" "Toggle draft status" blogmore-toggle-draft :inapt-if blogmore--outwith-post-p)
-    ("c" "Set post category" blogmore-set-category :inapt-if blogmore--outwith-post-p)
-    ("t" "Add tag" blogmore-add-tag :inapt-if blogmore--outwith-post-p)
-    ("u d" "Update date" blogmore-update-date :inapt-if blogmore--outwith-post-p)
-    ("u m" "Update modified date" blogmore-update-modified :inapt-if blogmore--outwith-post-p)]
+    ("n" "New post" blogmore-new :inapt-if-nil blogmore--current-blog)
+    ("e" "Edit post" blogmore-edit :inapt-if-nil blogmore--current-blog)
+    ("d" "Toggle draft status" blogmore-toggle-draft :inapt-if-not blogmore--post-p)
+    ("c" "Set post category" blogmore-set-category :inapt-if-not blogmore--post-p)
+    ("t" "Add tag" blogmore-add-tag :inapt-if-not blogmore--post-p)
+    ("u d" "Update date" blogmore-update-date :inapt-if-not blogmore--post-p)
+    ("u m" "Update modified date" blogmore-update-modified :inapt-if-not blogmore--post-p)]
    ["Links"
-    ("l c" "Link to a category" blogmore-link-category :inapt-if blogmore--outwith-post-p)
-    ("l p" "Link to a post" blogmore-link-post :inapt-if blogmore--outwith-post-p)
-    ("l t" "Link to a tag" blogmore-link-tag :inapt-if blogmore--outwith-post-p)]])
+    ("l c" "Link to a category" blogmore-link-category :inapt-if-not blogmore--post-p)
+    ("l p" "Link to a post" blogmore-link-post :inapt-if-not blogmore--post-p)
+    ("l t" "Link to a tag" blogmore-link-tag :inapt-if-not blogmore--post-p)]])
 
 (provide 'blogmore)
 
