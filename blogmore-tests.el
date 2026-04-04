@@ -123,7 +123,7 @@
 (ert-deftest blogmore--file-from-title-test ()
   "Test filename generation from post titles."
   (let ((blogmore--current-blog (make-blogmore--blog :posts-directory "/tmp/"))
-        (post-dir (format-time-string "%Y"))
+        (post-dir (format-time-string "%Y/%m/%d"))
         (today (format-time-string "%Y-%m-%d")))
     (dolist (case blogmore--test-titles)
       (should (string-match

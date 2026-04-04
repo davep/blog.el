@@ -51,6 +51,7 @@
 The keys are the names of the blogs, and the values are lists of the form
   (POSTS-DIRECTORY
    POST-TEMPLATE
+   POST-SUBDIRECTORY-FUNCTION
    POST-MAKER-FUNCTION
    CATEGORY-MAKER-FUNCTION
    TAG-MAKER-FUNCTION
@@ -62,6 +63,9 @@ Where:
 - POSTS-DIRECTORY is the directory where the blog's posts are stored.
 - POST-TEMPLATE is a template for new posts. If nil,
   `blogmore-default-post-template' is used.
+- POST-SUBDIRECTORY-FUNCTION is a function that returns a string to be
+  used as a subdirectory for new posts. This is combined with the posts
+  directory to generate the full path for a new blog post.
 - POST-MAKER-FUNCTION is a function that takes a filename and returns a
   string to be used in the post's URL. If nil,
   `blogmore-default-post-maker-function' is used.
@@ -90,6 +94,9 @@ Where:
                         (const :tag "Default" nil)
                         (string :tag "Custom"))
                 (choice :tag "Post maker function"
+                        (const :tag "Default" nil)
+                        (function :tag "Custom"))
+                (choice :tag "Post subdirectory function"
                         (const :tag "Default" nil)
                         (function :tag "Custom"))
                 (choice :tag "Category maker function"
@@ -137,6 +144,16 @@ argument is the date."
   :type 'function
   :group 'blogmore)
 
+(defcustom blogmore-default-post-subdirectory-function
+  (lambda ()
+    (format-time-string "%Y/%m/%d/"))
+  "Default function to generate the subdirectory for a blog post.
+
+This is combined with the posts directory to generate the full path for
+a new blog post."
+  :type 'function
+  :group 'blogmore)
+
 (defcustom blogmore-default-category-maker-function #'blogmore--slug
   "Default function to generate a slug for a category."
   :type 'function
@@ -173,6 +190,9 @@ argument is the date."
   (posts-directory
    nil
    :documentation "The directory where the blog's posts are stored")
+  (post-subdirectory-function
+   nil
+   :documentation "A function for generating a subdirectory for new posts")
   (post-template
    nil
    :documentation "A template for new posts")
@@ -242,6 +262,7 @@ to select a blog to work on first."
          ,(intern (format "blogmore-default-%s" setting)))))
 
 (blogmore--setting post-template)
+(blogmore--setting post-subdirectory-function)
 (blogmore--setting post-maker-function)
 (blogmore--setting category-maker-function)
 (blogmore--setting tag-maker-function)
@@ -369,8 +390,11 @@ if its value is not true, its value is set to true."
     (blogmore--set-frontmatter-property property "true")))
 
 (defun blogmore--post-directory ()
-  "Get the directory for the current year's blog posts."
-  (format "%s%s" (file-name-as-directory (blogmore--posts-directory)) (format-time-string "%Y")))
+  "Get the full directory for a new blog post file."
+  (format
+   "%s%s"
+   (file-name-as-directory (blogmore--posts-directory))
+   (file-name-as-directory (funcall (blogmore--post-subdirectory-function)))))
 
 (defun blogmore--ensure-directory ()
   "Ensure that the given directory exists."
