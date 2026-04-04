@@ -534,7 +534,7 @@ if its value is not true, its value is set to true."
 
 ;;;###autoload
 (transient-define-prefix blogmore ()
-  "BlogMore commands."
+  "Show a transient for BlogMore commands."
   [["Blog"
     ("b"  "Select blog" blogmore-work-on)]
    ["Post"
