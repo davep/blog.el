@@ -86,6 +86,24 @@
     (goto-char (point-min))
     (should-not (blogmore--post-p))))
 
+(ert-deftest blogmore--blog-post-p-test ()
+  "Test blogmore--blog-post-p returns correct values."
+  (let ((blogmore--current-blog (make-blogmore--blog :posts-directory "/tmp/")))
+    (with-temp-buffer
+      (insert "---\ntitle: Test\n---\n\nContent")
+      (goto-char (point-min))
+      (should (blogmore--blog-post-p))))
+  (let ((blogmore--current-blog nil))
+    (with-temp-buffer
+      (insert "---\ntitle: Test\n---\n\nContent")
+      (goto-char (point-min))
+      (should-not (blogmore--blog-post-p))))
+  (let ((blogmore--current-blog (make-blogmore--blog :posts-directory "/tmp/")))
+    (with-temp-buffer
+      (insert "No frontmatter here")
+      (goto-char (point-min))
+      (should-not (blogmore--blog-post-p)))))
+
 (ert-deftest blogmore--insert-link-test ()
    "Test blogmore--insert-link inserts a Markdown link and point on the closing ]."
    (with-temp-buffer
