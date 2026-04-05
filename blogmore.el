@@ -45,6 +45,7 @@
     :initform ""
     :type string
     :custom string
+    :label "Blog Title"
     :accessor blogmore-blog-title
     :documentation "The title of the blog")
    (posts-directory
@@ -52,54 +53,63 @@
     :initform ""
     :type string
     :custom directory
+    :label "Posts Directory"
     :documentation "The directory where the blog's posts are stored")
    (post-subdirectory-function
     :initarg :post-subdirectory-function
     :initform nil
     :type (or null function)
     :custom (choice (const :tag "Default") function)
+    :label "Post Subdirectory Function"
     :documentation "A function for generating a subdirectory for a new post")
    (post-template
     :initarg :post-template
     :initform nil
     :type (or null string)
     :custom (choice (const :tag "Default") function)
+    :label "Post Template"
     :documentation "A template for new posts")
    (post-maker-function
     :initarg :post-maker-function
     :initform nil
     :type (or null function)
     :custom (choice (const :tag "Default") function)
+    :label "Post Maker Function"
     :documentation "A function for making a post's URL")
    (category-maker-function
     :initarg :category-maker-function
     :initform nil
     :type (or null function)
     :custom (choice (const :tag "Default") function)
+    :label "Category Maker Function"
     :documentation "A function for making a category's URL")
    (tag-maker-function
     :initarg :tag-maker-function
     :initform nil
     :type (or null function)
     :custom (choice (const :tag "Default") function)
+    :label "Tag Maker Function"
     :documentation "A function for making a tag's URL")
    (post-link-format
     :initarg :post-link-format
     :initform nil
     :type (or null string)
     :custom (choice (const :tag "Default") string)
+    :label "Post Link Format"
     :documentation "Format string for a link to a post")
    (category-link-format
     :initarg :category-link-format
     :initform nil
     :type (or null string)
     :custom (choice (const :tag "Default") string)
+    :label "Category Link Format"
     :documentation "Format string for a link to a category")
    (tag-link-format
     :initarg :tag-link-format
     :initform nil
     :type (or null string)
     :custom (choice (const :tag "Default") string)
+    :label "Tag Link Format"
     :documentation "Format string for a link to a tag"))
   :documentation "A class representing the settings for a single blog.")
 
