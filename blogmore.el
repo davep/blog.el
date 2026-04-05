@@ -45,6 +45,7 @@
     :initform ""
     :type string
     :custom string
+    :accessor blogmore-blog-title
     :documentation "The title of the blog")
    (posts-directory
     :initarg :posts-directory
@@ -442,18 +443,11 @@ if its value is not true, its value is set to true."
 ;;;###autoload
 (defun blogmore-work-on (blog)
   "Set the current blog to BLOG."
-  (interactive
-   (list
-    (completing-read
-     "Blog: "
-     (mapcar (lambda (entry)
-               (with-slots (blog-title) entry blog-title))
-             blogmore-blogs)
-     nil t)))
+  (interactive (list (completing-read "Blog: " (mapcar #'blogmore-blog-title blogmore-blogs) nil t)))
   (setq blogmore--current-blog
         (seq-find
          (lambda (candidate)
-           (string= (with-slots (blog-title) candidate blog-title) blog))
+           (string= (blogmore-blog-title candidate) blog))
          blogmore-blogs))
   (message "Now working on %s" blog)
   (when transient-current-prefix
