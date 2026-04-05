@@ -157,4 +157,19 @@
     (should (equal (sort (blogmore--current-tags) #'string-lessp)
                    '("A" "Emacs" "Lisp" "Org" "Z")))))
 
+(ert-deftest blogmore--chosen-blog-defaulting-test ()
+  "Test that blogmore--current-blog smartly defaults.."
+  ;; With no blog selected by the user.
+  (let ((blogmore--current-blog))
+    ;; No blogs defined.
+    (let ((blogmore-blogs))
+      (should-error (blogmore--chosen-blog) :type 'user-error))
+    ;; One blog defined.
+    (let ((blogmore-blogs (list (blogmore-blog :title "Test Blog"))))
+      (should (equal (blogmore--chosen-blog) (car blogmore-blogs))))
+    ;; Multiple blogs defined.
+    (let ((blogmore-blogs (list (blogmore-blog :title "Test Blog 1")
+                                (blogmore-blog :title "Test Blog 2"))))
+      (should-error (blogmore--chosen-blog) :type 'user-error))))
+
 ;;; blogmore-tests.el ends here
