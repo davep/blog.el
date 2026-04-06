@@ -225,4 +225,20 @@
       (let ((blogmore--current-blog (car blogmore-blogs)))
         (should (equal (blogmore--chosen-blog) (car blogmore-blogs)))))))
 
+(ert-deftest blogmore-add-tag-test ()
+  "Test that blogmore-add-tag adds a tag to the current post."
+  (let ((blogmore--current-blog (blogmore-blog :posts-directory "/tmp/")))
+    (with-temp-buffer
+      (insert "---\ntitle: Test\n---\n\nContent")
+      (let ((inhibit-message t))
+        (should-not (blogmore-get-frontmatter "tags"))
+        (blogmore-add-tag "Emacs")
+        (should (equal (blogmore-get-frontmatter "tags") "Emacs"))
+        (blogmore-add-tag "Lisp")
+        (should (equal (blogmore-get-frontmatter "tags") "Emacs, Lisp"))
+        (blogmore-add-tag "Emacs")
+        (should (equal (blogmore-get-frontmatter "tags") "Emacs, Lisp"))
+        (blogmore-add-tag "A")
+        (should (equal (blogmore-get-frontmatter "tags") "A, Emacs, Lisp"))))))
+
 ;;; blogmore-tests.el ends here
