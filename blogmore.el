@@ -132,7 +132,13 @@
       ,@body))
 
 (defun blogmore-clean-time-string (time-string)
-  "Clean TIME-STRING to the format YYYY-MM-DDTHH:MM:SS+NNNN."
+  "Clean TIME-STRING to the format YYYY-MM-DDTHH:MM:SS+NNNN.
+
+Given a time string that is roughly in ISO8601 format, clean it to a
+format that can be parsed by `parse-iso8601-time-string'. Currently this
+revolves around cleaning up any space between the date and time, and
+between the time and timezone, to ensure that the string is in a format
+that can be parsed."
   (replace-regexp-in-string
    (rx (group (= 4 digit) "-" (= 2 digit) "-" (= 2 digit))
        (1+ (any " T"))
