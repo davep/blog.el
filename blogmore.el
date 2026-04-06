@@ -384,11 +384,7 @@ multiple blogs defined."
          blogmore--current-blog)
         ((= (length blogmore-blogs) 1)
          ;; There's only one blog defined, so use that.
-         (car blogmore-blogs))
-        (t
-         ;; There are either no blogs defined or multiple blogs defined, so
-         ;; we can't work out the best option.
-         nil)))
+         (car blogmore-blogs))))
 
 (defun blogmore--chosen-blog ()
   "Get the details of the currently-chosen blog.
