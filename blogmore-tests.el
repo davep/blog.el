@@ -95,14 +95,17 @@
    "Test toggling frontmatter properties."
    (let ((blogmore--current-blog (blogmore-blog :posts-directory "/tmp/")))
      (with-temp-buffer
-       (insert "---\ntitle: Test\n---\n\nContent")
+       (insert "---\ntitle: Test\nother: false\n---\n\nContent")
        (should (blogmore-toggle-frontmatter "test"))
        (should (equal (blogmore-get-frontmatter "test") "true"))
        (should (blogmore-toggle-frontmatter "test"))
-       (should-not (blogmore-get-frontmatter "test"))))
+       (should-not (blogmore-get-frontmatter "test"))
+       (should (equal (blogmore-get-frontmatter "other") "false"))
+       (should (blogmore-toggle-frontmatter "other"))
+       (should (equal (blogmore-get-frontmatter "other") "true")))
      (with-temp-buffer
        (insert "No frontmatter here")
-       (should-not (blogmore-toggle-frontmatter "test"))))
+       (should-not (blogmore-toggle-frontmatter "test")))))
 
 (ert-deftest blogmore--blog-post-p-test ()
   "Test blogmore--blog-post-p returns correct values."
