@@ -66,9 +66,11 @@
    "Test setting frontmatter properties."
    (let ((blogmore--current-blog (blogmore-blog :posts-directory "/tmp/")))
      (with-temp-buffer
-       (insert "---\ntitle: Old Title\n---\n\nContent")
+       (insert "---\n---\n")
        (should (blogmore-set-frontmatter "title" "New Title"))
        (should (equal (blogmore-get-frontmatter "title") "New Title"))
+       (should (blogmore-set-frontmatter "title" "Newer Title"))
+       (should (equal (blogmore-get-frontmatter "title") "Newer Title"))
        (should (blogmore-set-frontmatter "category" "Tech"))
        (should (equal (blogmore-get-frontmatter "category") "Tech"))
        (should (blogmore-set-frontmatter "empty" ""))
