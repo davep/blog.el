@@ -241,4 +241,18 @@
         (blogmore-add-tag "A")
         (should (equal (blogmore-get-frontmatter "tags") "A, Emacs, Lisp"))))))
 
+(ert-deftest blogmore-remove-tag-test ()
+  "Test that blogmore-remove-tag removes a tag from the current post."
+  (let ((blogmore--current-blog (blogmore-blog :posts-directory "/tmp/")))
+    (with-temp-buffer
+      (insert "---\ntitle: Test\ntags: A, Emacs, Lisp\n---\n\nContent")
+      (let ((inhibit-message t))
+        (should (equal (blogmore-get-frontmatter "tags") "A, Emacs, Lisp"))
+        (blogmore-remove-tag "Emacs")
+        (should (equal (blogmore-get-frontmatter "tags") "A, Lisp"))
+        (blogmore-remove-tag "A")
+        (should (equal (blogmore-get-frontmatter "tags") "Lisp"))
+        (blogmore-remove-tag "Lisp")
+        (should (equal (blogmore-get-frontmatter "tags") ""))))))
+
 ;;; blogmore-tests.el ends here
