@@ -41,51 +41,59 @@
    "Test detection of frontmatter presence."
    (with-temp-buffer
      (insert "---\ntitle: Test\n---\n\nContent")
-     (goto-char (point-min))
      (should (blogmore--frontmatter-p "title"))
      (should (not (blogmore--frontmatter-p "category"))))
    (with-temp-buffer
      (insert "No frontmatter here")
-     (goto-char (point-min))
      (should-not (blogmore--frontmatter-p "title"))))
 
-(ert-deftest blogmore--get-frontmatter-property-test ()
+(ert-deftest blogmore-get-frontmatter-test ()
    "Test retrieval of frontmatter values."
    (with-temp-buffer
      (insert "---\ntitle: Test Title\ndate: 2026-04-02\n---\n\nContent")
-     (goto-char (point-min))
-     (should (equal (blogmore--get-frontmatter-property "title") "Test Title"))
-     (should-not (blogmore--get-frontmatter-property "category")))
+     (should (equal (blogmore-get-frontmatter "title") "Test Title"))
+     (should-not (blogmore-get-frontmatter "category")))
    (with-temp-buffer
      (insert "No frontmatter here")
-     (goto-char (point-min))
-     (should-not (blogmore--get-frontmatter-property "title"))))
+     (should-not (blogmore-get-frontmatter "title"))))
 
-(ert-deftest blogmore--set-frontmatter-property-test ()
+(ert-deftest blogmore-set-frontmatter-test ()
    "Test setting frontmatter properties."
    (let ((blogmore--current-blog (blogmore-blog :posts-directory "/tmp/")))
      (with-temp-buffer
        (insert "---\ntitle: Old Title\n---\n\nContent")
-       (goto-char (point-min))
-       (blogmore--set-frontmatter-property "title" "New Title")
-       (should (equal (blogmore--get-frontmatter-property "title") "New Title"))
-       (blogmore--set-frontmatter-property "category" "Tech")
-       (should (equal (blogmore--get-frontmatter-property "category") "Tech")))
+       (should (blogmore-set-frontmatter "title" "New Title"))
+       (should (equal (blogmore-get-frontmatter "title") "New Title"))
+       (should (blogmore-set-frontmatter "category" "Tech"))
+       (should (equal (blogmore-get-frontmatter "category") "Tech")))
      (with-temp-buffer
        (insert "No frontmatter here")
-       (goto-char (point-min))
-       (should-error (blogmore--set-frontmatter-property "title" "New Title") :type 'user-error))))
+       (should-not (blogmore-set-frontmatter "title" "New Title")))))
 
-(ert-deftest blogmore--post-p-test ()
-  "Test detection of blog post frontmatter."
-  (with-temp-buffer
-    (insert "---\ntitle: Test\n---\n\nContent")
-    (goto-char (point-min))
-    (should (blogmore--post-p)))
-  (with-temp-buffer
-    (insert "No frontmatter here")
-    (goto-char (point-min))
-    (should-not (blogmore--post-p))))
+(ert-deftest blogmore-remove-frontmatter-test ()
+   "Test removal of frontmatter properties."
+   (let ((blogmore--current-blog (blogmore-blog :posts-directory "/tmp/")))
+     (with-temp-buffer
+       (insert "---\ntitle: Test\ncategory: Tech\n---\n\nContent")
+       (should (blogmore-remove-frontmatter "title"))
+       (should-not (blogmore-get-frontmatter "title"))
+       (should (blogmore-get-frontmatter "category")))
+     (with-temp-buffer
+       (insert "No frontmatter here")
+       (should-not (blogmore-remove-frontmatter "title")))))
+
+(ert-deftest blogmore-toggle-frontmatter-test ()
+   "Test toggling frontmatter properties."
+   (let ((blogmore--current-blog (blogmore-blog :posts-directory "/tmp/")))
+     (with-temp-buffer
+       (insert "---\ntitle: Test\n---\n\nContent")
+       (should (blogmore-toggle-frontmatter "test"))
+       (should (equal (blogmore-get-frontmatter "test") "true"))
+       (should (blogmore-toggle-frontmatter "test"))
+       (should-not (blogmore-get-frontmatter "test"))))
+     (with-temp-buffer
+       (insert "No frontmatter here")
+       (should-not (blogmore-toggle-frontmatter "test"))))
 
 (ert-deftest blogmore--blog-post-p-test ()
   "Test blogmore--blog-post-p returns correct values."
