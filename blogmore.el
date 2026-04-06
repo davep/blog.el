@@ -142,7 +142,7 @@ frontmatter is found, return nil."
         (when (re-search-forward blogmore--frontmatter-marker-regexp nil t)
           (cons start (match-beginning 0)))))))
 
-(cl-defstruct (blogmore--frontmatter-property-location (:type list))
+(cl-defstruct blogmore--frontmatter-property-location
   "A struct representing the location of a property in the frontmatter."
   (start nil :documentation "The position of the start of the property's value.")
   (end nil :documentation "The position of the end of the property's value.")

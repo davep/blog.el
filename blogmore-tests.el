@@ -25,17 +25,22 @@
        (should (looking-at "---"))))
    (with-temp-buffer
      (insert "No frontmatter here")
-     (should (null (blogmore--frontmatter-bounds)))))
+     (should-not (blogmore--frontmatter-bounds))))
 
 (ert-deftest blogmore--locate-frontmatter-test ()
    "Test locating frontmatter properties."
    (with-temp-buffer
      (insert "---\ntitle: Test Title\ndate: 2026-04-02\n---\n\nContent")
      (let ((result (blogmore--locate-frontmatter "title")))
-       (should (consp result))
-       (should (equal (string-trim (buffer-substring (nth 0 result) (nth 1 result))) (nth 2 result)))
-       (should (equal (nth 2 result) "Test Title")))
-     (should (null (blogmore--locate-frontmatter "category")))))
+       (should (blogmore--frontmatter-property-location-p result))
+       (should (equal
+                (string-trim
+                 (buffer-substring
+                  (blogmore--frontmatter-property-location-start result)
+                  (blogmore--frontmatter-property-location-end result)))
+                (blogmore--frontmatter-property-location-value result)))
+       (should (equal (blogmore--frontmatter-property-location-value result) "Test Title")))
+     (should-not (blogmore--locate-frontmatter "category"))))
 
 (ert-deftest blogmore--frontmatter-p-test ()
    "Test detection of frontmatter presence."
