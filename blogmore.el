@@ -210,8 +210,15 @@ that can be parsed."
   "Generate a slug from the given TITLE."
   (thread-last
     title
+    ;; Make everything lowercase.
     downcase
+    ;; Characters that are just flat out removed.
+    (replace-regexp-in-string (rx (+ (any "'\""))) "")
+    ;; Replace any run of characters that aren't letters or numbers with a
+    ;; single dash.
     (replace-regexp-in-string (rx (+ (not (any "0-9a-z")))) "-")
+    ;; Remove any leading or trailing dashes that may have been introduced
+    ;; by the previous step.
     (replace-regexp-in-string (rx (or (seq bol "-") (seq "-" eol))) "")))
 
 (defun blogmore-get-frontmatter (property)

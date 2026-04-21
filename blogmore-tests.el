@@ -6,6 +6,7 @@
   '(("" . "")
     ("Hello World!" . "hello-world")
     ("Emacs & Lisp" . "emacs-lisp")
+    ("That's a nice defun" . "thats-a-nice-defun")
     ("2026: A Blog Odyssey" . "2026-a-blog-odyssey")))
 
 (ert-deftest blogmore-slug-test ()
