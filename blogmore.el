@@ -40,6 +40,7 @@
 (require 'eieio-custom)
 (require 'parse-time)
 (require 'transient)
+(require 'ucs-normalize)
 
 
 (defclass blogmore-blog ()
@@ -212,6 +213,10 @@ that can be parsed."
     title
     ;; Make everything lowercase.
     downcase
+    ;; "ASCIIfy" as many accented characters as possible.
+    (ucs-normalize-NFKD-string)
+    (seq-filter (lambda (char) (or (<= char #x300) (>= char #x36F))))
+    (concat)
     ;; Characters that are just flat out removed.
     (replace-regexp-in-string (rx (+ (any "'\""))) "")
     ;; Replace any run of characters that aren't letters or numbers with a
