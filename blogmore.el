@@ -468,43 +468,48 @@ to select a blog to work on first."
    (file-name-as-directory (blogmore--post-directory))
    (funcall (blogmore--post-file-name-from-title-function) title)))
 
-(defun blogmore--get-all (property)
+(defun blogmore--property-getter (property &optional splitter)
+  "Generate a function to match PROPERTY in a string and return its value.
+
+If SPLITTER is provided, split the value using SPLITTER and return a
+list of values instead."
+  (lambda (candidate)
+    (when (string-match
+           (rx
+            bol (literal property) ":"
+            (zero-or-more space)
+            (group (zero-or-more any))
+            eol)
+           candidate)
+      (let ((value (string-trim (match-string 1 candidate))))
+        (if splitter
+            (split-string value splitter t " ")
+          value)))))
+
+(defun blogmore--get-all (property &optional separator)
   "Get a list of all values for PROPERTY from existing posts."
-  (seq-uniq
-   (split-string
-    (shell-command-to-string
-     (format
-      (if (executable-find "rg")
-          "rg --no-filename --no-line-number --no-heading \"^%1$s:\" \"%2$s\" -g \"*.md\""
-        "find \"%2$s\" -type f -name \"*.md\" -exec grep -hi \"^%1$s:\" /dev/null {} +")
-      property (expand-file-name (blogmore--posts-directory)))) "\n" t)
-   #'string-equal-ignore-case))
+  (mapcar
+   (blogmore--property-getter property separator)
+   (seq-uniq
+    (split-string
+     (shell-command-to-string
+      (format
+       (if (executable-find "rg")
+           "rg --no-filename --no-line-number --no-heading \"^%1$s:\" \"%2$s\" -g \"*.md\""
+         "find \"%2$s\" -type f -name \"*.md\" -exec grep -hi \"^%1$s:\" /dev/null {} +")
+       property (expand-file-name (blogmore--posts-directory)))) "\n" t)
+    #'string-equal-ignore-case)))
 
 (defun blogmore--current-categories ()
   "Get a list of categories from existing posts."
-  (sort
-   (delq
-    nil
-    (mapcar
-     (lambda (candidate)
-       (when (string-match (rx bol "category:" (* space) (group (* any)) eol) candidate)
-         (string-trim (match-string 1 candidate))))
-     (blogmore--get-all "category")))
-   #'string-lessp))
+  (sort (delq nil (blogmore--get-all "category")) #'string-lessp))
 
 (defun blogmore--current-tags ()
   "Get a list of tags from existing posts."
   (seq-uniq
    ;; Sorting *before* making unique because I want to favour upper-case
    ;; over lower-case in the resulting set.
-   (sort
-    (flatten-list
-     (mapcar
-      (lambda (candidate)
-        (when (string-match (rx bol "tags:" (* space) (group (* any)) eol) candidate)
-          (split-string (match-string 1 candidate) "," t " ")))
-      (blogmore--get-all "tags")))
-    #'string-lessp)
+   (sort (flatten-list (blogmore--get-all "tags" ",")) #'string-lessp)
    #'string-equal-ignore-case))
 
 (defun blogmore--post-picker ()
