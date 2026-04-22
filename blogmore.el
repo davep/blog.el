@@ -214,9 +214,9 @@ that can be parsed."
     ;; Make everything lowercase.
     downcase
     ;; "ASCIIfy" as many accented characters as possible.
-    (ucs-normalize-NFKD-string)
+    ucs-normalize-NFKD-string
     (seq-filter (lambda (char) (or (< char #x300) (> char #x36F))))
-    (concat)
+    concat
     ;; Characters that are just flat out removed.
     (replace-regexp-in-string (rx (+ (any "'\""))) "")
     ;; Replace any run of characters that aren't letters or numbers with a
