@@ -626,6 +626,7 @@ If an image is found the return value is a list of the form:
   (blogmore--within-post
    (blogmore-toggle-frontmatter "invite_comments")))
 
+;;;###autoload
 (defun blogmore-invite-comments-to (address)
   "Set the invite-comments status of the post to ADDRESS."
   (interactive
