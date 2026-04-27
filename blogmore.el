@@ -620,6 +620,13 @@ If an image is found the return value is a list of the form:
    (blogmore-toggle-frontmatter "draft")))
 
 ;;;###autoload
+(defun blogmore-toggle-invite-comments ()
+  "Toggle the invite-comments status of the post."
+  (interactive)
+  (blogmore--within-post
+   (blogmore-toggle-frontmatter "invite_comments")))
+
+;;;###autoload
 (defun blogmore-set-category (category)
   "Set the category of the post to CATEGORY."
   (interactive (blogmore--with "Category" (blogmore--current-categories)))
@@ -729,6 +736,7 @@ If an image is found the return value is a list of the form:
     ("e" "Edit post" blogmore-edit :inapt-if-not blogmore--chosen-blog-sans-error)
     ("d" "Toggle draft status" blogmore-toggle-draft :inapt-if-not blogmore--blog-post-p)
     ("c" "Set post category" blogmore-set-category :inapt-if-not blogmore--blog-post-p)
+    ("C" "Toggle invite comments" blogmore-toggle-invite-comments :inapt-if-not blogmore--blog-post-p)
     ("t" "Add tag" blogmore-add-tag :inapt-if-not blogmore--blog-post-p)
     ("T" "Remove tag" blogmore-remove-tag :inapt-if-not blogmore--blog-post-p)
     ("u d" "Update date" blogmore-update-date :inapt-if-not blogmore--blog-post-p)
