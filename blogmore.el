@@ -626,6 +626,15 @@ If an image is found the return value is a list of the form:
   (blogmore--within-post
    (blogmore-toggle-frontmatter "invite_comments")))
 
+(defun blogmore-invite-comments-to (address)
+  "Set the invite-comments status of the post to ADDRESS."
+  (interactive
+   (list
+    (read-string "Invite comments to: " (blogmore-get-frontmatter "invite_comments_to"))))
+  (if (string-empty-p address)
+      (blogmore-remove-frontmatter "invite_comments_to")
+    (blogmore-set-frontmatter "invite_comments_to" address)))
+
 ;;;###autoload
 (defun blogmore-set-category (category)
   "Set the category of the post to CATEGORY."
@@ -736,7 +745,6 @@ If an image is found the return value is a list of the form:
     ("e" "Edit post" blogmore-edit :inapt-if-not blogmore--chosen-blog-sans-error)
     ("d" "Toggle draft status" blogmore-toggle-draft :inapt-if-not blogmore--blog-post-p)
     ("c" "Set post category" blogmore-set-category :inapt-if-not blogmore--blog-post-p)
-    ("C" "Toggle invite comments" blogmore-toggle-invite-comments :inapt-if-not blogmore--blog-post-p)
     ("t" "Add tag" blogmore-add-tag :inapt-if-not blogmore--blog-post-p)
     ("T" "Remove tag" blogmore-remove-tag :inapt-if-not blogmore--blog-post-p)
     ("u d" "Update date" blogmore-update-date :inapt-if-not blogmore--blog-post-p)
@@ -747,7 +755,9 @@ If an image is found the return value is a list of the form:
     ("l t" "Link to a tag" blogmore-link-tag :inapt-if-not blogmore--blog-post-p)
     ""
     "Other"
-    ("i" "Cycle image type at point" blogmore-cycle-image-at-point :inapt-if-not blogmore--image-at-point)]])
+    ("i" "Cycle image type at point" blogmore-cycle-image-at-point :inapt-if-not blogmore--image-at-point)
+    ("C t" "Toggle invite comments" blogmore-toggle-invite-comments :inapt-if-not blogmore--blog-post-p)
+    ("C a" "Comments to address" blogmore-invite-comments-to :inapt-if-not blogmore--blog-post-p)]])
 
 (provide 'blogmore)
 
