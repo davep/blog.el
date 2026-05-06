@@ -577,6 +577,14 @@ If an image is found the return value is a list of the form:
        (match-string 2 line)
        (match-string 3 line)))))
 
+(defun blogmore--transform-image-at-point (transform)
+  "Apply TRANSFORM to the image at point."
+  (if-let ((image (blogmore--image-at-point)))
+      (save-excursion
+        (delete-region (line-beginning-position) (line-end-position))
+        (insert (funcall transform image)))
+    (user-error "No image found at point")))
+
 
 ;; Commands:
 
@@ -717,19 +725,27 @@ If an image is found the return value is a list of the form:
     (insert tag)))
 
 ;;;###autoload
+(defun blogmore-toggle-image-centre ()
+  "Toggle whether the image at `'point' is centred or not."
+  (interactive)
+  (blogmore--transform-image-at-point
+   (lambda (image)
+     (format "%s(%s%s)"
+             (nth 0 image)
+             (nth 1 image)
+             (if (string= (nth 2 image) "#centre") "" "#centre")))))
+
+;;;###autoload
 (defun blogmore-cycle-image-at-point ()
   "Cycle the type of the image at `point'."
   (interactive)
-  (if-let ((image (blogmore--image-at-point)))
-      (save-excursion
-        (delete-region (line-beginning-position) (line-end-position))
-        (insert
-         (format "%s(%s.%s%s)"
-                 (nth 0 image)
-                 (file-name-sans-extension (nth 1 image))
-                 (blogmore--cycle-image-type (nth 1 image))
-                 (nth 2 image))))
-    (user-error "No image found at point")))
+  (blogmore--transform-image-at-point
+   (lambda (image)
+     (format "%s(%s.%s%s)"
+             (nth 0 image)
+             (file-name-sans-extension (nth 1 image))
+             (blogmore--cycle-image-type (nth 1 image))
+             (nth 2 image)))))
 
 ;;;###autoload
 (defun blogmore-become-like (post)
