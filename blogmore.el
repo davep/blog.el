@@ -560,7 +560,7 @@ the resulting list, returning a list of all values."
 
 If an image is found the return value is a list of the form:
 
-  (ALT-TEXT URL TITLE)."
+  (ALT-TEXT URL ANCHOR)."
   (let ((line (buffer-substring-no-properties
                (line-beginning-position)
                (line-end-position))))
