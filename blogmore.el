@@ -784,7 +784,8 @@ If an image is found the return value is a list of the form:
     ("l t" "Link to a tag" blogmore-link-tag :inapt-if-not blogmore--blog-post-p)
     ""
     "Other"
-    ("i" "Cycle image type at point" blogmore-cycle-image-at-point :inapt-if-not blogmore--image-at-point)
+    ("i t" "Cycle image type at point" blogmore-cycle-image-at-point :inapt-if-not blogmore--image-at-point)
+    ("i c" "Toggle image centre at point" blogmore-toggle-image-centre :inapt-if-not blogmore--image-at-point)
     ("C t" "Toggle invite comments" blogmore-toggle-invite-comments :inapt-if-not blogmore--blog-post-p)
     ("C a" "Comments to address" blogmore-invite-comments-to :inapt-if-not blogmore--blog-post-p)]])
 
