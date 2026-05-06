@@ -731,6 +731,16 @@ If an image is found the return value is a list of the form:
     (user-error "No image found at point")))
 
 ;;;###autoload
+(defun blogmore-become-like (post)
+  "Copy the category and tags from POST to the current post."
+  (interactive (blogmore--post-picker))
+  (blogmore--within-post
+   (when-let ((category (blogmore-with-post post (blogmore-get-frontmatter "category"))))
+     (blogmore-set-category category)))
+   (when-let ((tags (blogmore-with-post post (blogmore-get-frontmatter "tags"))))
+     (blogmore-set-frontmatter "tags" tags)))
+
+;;;###autoload
 (transient-define-prefix blogmore ()
   "Show a transient for BlogMore commands."
   [:description
@@ -744,6 +754,7 @@ If an image is found the return value is a list of the form:
    ["Post"
     ("n" "New post" blogmore-new :inapt-if-not blogmore--chosen-blog-sans-error)
     ("e" "Edit post" blogmore-edit :inapt-if-not blogmore--chosen-blog-sans-error)
+    ("=" "Become like post" blogmore-become-like :inapt-if-not blogmore--blog-post-p)
     ("d" "Toggle draft status" blogmore-toggle-draft :inapt-if-not blogmore--blog-post-p)
     ("c" "Set post category" blogmore-set-category :inapt-if-not blogmore--blog-post-p)
     ("t" "Add tag" blogmore-add-tag :inapt-if-not blogmore--blog-post-p)
