@@ -716,6 +716,7 @@ If an image is found the return value is a list of the form:
   (save-excursion
     (insert tag)))
 
+;;;###autoload
 (defun blogmore-cycle-image-at-point ()
   "Cycle the type of the image at `point'."
   (interactive)
