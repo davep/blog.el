@@ -581,8 +581,10 @@ If an image is found the return value is a list of the form:
   "Apply TRANSFORM to the image at point."
   (if-let ((image (blogmore--image-at-point)))
       (save-excursion
-        (delete-region (line-beginning-position) (line-end-position))
-        (insert (funcall transform image)))
+        (replace-region-contents
+         (line-beginning-position)
+         (line-end-position)
+         (lambda () (funcall transform image))))
     (user-error "No image found at point")))
 
 
