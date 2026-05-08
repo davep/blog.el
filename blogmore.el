@@ -749,6 +749,13 @@ If an image is found the return value is a list of the form:
              (blogmore--cycle-image-type (nth 1 image))
              (nth 2 image)))))
 
+(defun blogmore-set-as-cover ()
+  "Set the image at `point' as the cover image for the post."
+  (interactive)
+  (if-let ((image (blogmore--image-at-point)))
+      (blogmore-set-frontmatter "cover" (nth 1 image))
+    (user-error "No image found at point")))
+
 ;;;###autoload
 (defun blogmore-become-like (post)
   "Copy the category and tags from POST to the current post."
@@ -788,6 +795,7 @@ If an image is found the return value is a list of the form:
     "Other"
     ("i t" "Cycle image type at point" blogmore-cycle-image-at-point :inapt-if-not blogmore--image-at-point)
     ("i c" "Toggle image centre at point" blogmore-toggle-image-centre :inapt-if-not blogmore--image-at-point)
+    ("i s" "Set image at point as cover" blogmore-set-as-cover :inapt-if-not blogmore--image-at-point)
     ("C t" "Toggle invite comments" blogmore-toggle-invite-comments :inapt-if-not blogmore--blog-post-p)
     ("C a" "Comments to address" blogmore-invite-comments-to :inapt-if-not blogmore--blog-post-p)]])
 
