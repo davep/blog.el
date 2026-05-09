@@ -728,7 +728,7 @@ If an image is found the return value is a list of the form:
 
 ;;;###autoload
 (defun blogmore-toggle-image-centre ()
-  "Toggle whether the image at `'point' is centred or not."
+  "Toggle whether the image at `point' is centred or not."
   (interactive)
   (blogmore--transform-image-at-point
    (lambda (image)
